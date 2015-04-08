@@ -43,11 +43,6 @@ void GaussianPyramid::CreatePyramid(const cv::Mat& image, int num_levels) {
 
     pyramid_.emplace_back(next_rows, next_cols, previous.type());
     cv::Mat& next = pyramid_.back();
-    if (subwindow_[0] == 295 && subwindow_[1] == 299 &&
-        subwindow_[2] == 146) {
-      cout << "Row offset: " << row_offset << ", Col offset: "
-           << col_offset << endl;
-    }
 
     const int kEndRow = row_offset + 2 * next_rows;
     const int kEndCol = col_offset + 2 * next_cols;
@@ -147,9 +142,6 @@ void GaussianPyramid::Expand(const cv::Mat& input,
   const double a = 0.4;
   cv::Mat norm = cv::Mat::zeros(output.rows, output.cols, CV_64F);
   cv::Mat upsamp = cv::Mat::zeros(output.rows, output.cols, CV_64F);
-
-  const int kEndRow = row_offset + 2 * output.rows;
-  const int kEndCol = col_offset + 2 * output.cols;
 
   for (int i = row_offset; i < output.rows; i += 2) {
     for (int j = col_offset; j < output.cols; j += 2) {

@@ -93,74 +93,9 @@ int main(int argc, char** argv) {
                col_range.start, col_range.end - 1});
           output(l, y, x) = tmp_pyr(l, full_res_roi_y >> l,
                                        full_res_roi_x >> l);
-          if (l == 0 && y == output[l].rows - 1 && x == 150) {
-            cout << "Subwindow is " << row_range.start << ", " 
-                 << row_range.end - 1 << ", " << col_range.start
-                 << ", " << col_range.end - 1 << endl;
-            cout << "Trying to index at (" << (full_res_roi_y >> l) << ", "
-                 << (full_res_roi_x >> l) << "), size is "
-                 << tmp_pyr[l].size() << endl;
-            cout << "Value is " << output(l, y, x) << endl;
-            cout << "ROI:" << endl;
-            cout << setprecision(6) << fixed;
-            for (int y = 0; y < r0.rows; y++) {
-              for (int x = 0; x < r0.cols; x++) {
-                cout << r0.at<double>(y, x) << "\t";
-              }
-              cout << endl;
-            }
-            cout << "Remapped:" << endl;
-            for (int y = 0; y < remapped.rows; y++) {
-              for (int x = 0; x < remapped.cols; x++) {
-                cout << remapped.at<double>(y, x) << "\t";
-              }
-              cout << endl;
-            }
-
-            cout << "Gaussian Pyramid:" << endl;
-            GaussianPyramid g_pyr(remapped, l+1,
-                {row_range.start, row_range.end - 1,
-                 col_range.start, col_range.end - 1});
-            for (int k = 0; k < l+2; k++) {
-              cout << "Level " << k << endl;
-              for (int y = 0; y < g_pyr[k].rows; y++) {
-                for (int x = 0; x < g_pyr[k].cols; x++) {
-                  cout << g_pyr(k, y, x) << "\t";
-                }
-                cout << endl;
-              }
-            }
-
-            cout << "Laplcian Pyramid:" << endl;
-            LaplacianPyramid pyr(remapped, l+1,
-                {row_range.start, row_range.end - 1,
-                 col_range.start, col_range.end - 1});
-            for (int k = 0; k < l+2; k++) {
-              cout << "Level " << k << endl;
-              for (int y = 0; y < pyr[k].rows; y++) {
-                for (int x = 0; x < pyr[k].cols; x++) {
-                  cout.precision(6);
-                  cout << pyr(k, y, x) << "\t";
-                }
-                cout << endl;
-              }
-            }
-          }
         }
       }
-
-      stringstream ss;
-      ss << "level" << l << ".png";
-      imwrite(ss.str(), ByteScale(output[l]));
-      ss.str("");
-      ss << "level" << l << ".bin";
-      OutputBinaryImage(ss.str(), output[l]);
     }
-
-    output_channels.push_back(output.Reconstruct());
-    stringstream ss;
-    ss << "reconstructed" << c << ".png";
-    imwrite(ss.str(), ByteScale(output_channels.back()));
   }
 
   cv::Mat reconstructed;
