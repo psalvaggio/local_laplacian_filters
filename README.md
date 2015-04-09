@@ -1,6 +1,8 @@
 # README #
 
-Implementation of the Local Laplacian Filters image processing algorithm in C++ using OpenCV.
+Implementation of the Local Laplacian Filters image processing algorithm in C++ using OpenCV. The algorithm is described here:
+
+Paris, Sylvain, Samuel W. Hasinoff, and Jan Kautz. "Local Laplacian filters: edge-aware image processing with a Laplacian pyramid." ACM Trans. Graph. 30.4 (2011): 68.
 
 The project is built using CMake
 
