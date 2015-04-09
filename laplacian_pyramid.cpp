@@ -6,31 +6,34 @@
 #include <iostream>
 
 using namespace std;
+using cv::Mat;
+using cv::Vec3d;
 
 LaplacianPyramid::LaplacianPyramid(int rows, int cols, int num_levels)
+    : LaplacianPyramid(rows, cols, 1, num_levels) {}
+
+LaplacianPyramid::LaplacianPyramid(int rows,
+                                   int cols,
+                                   int channels,
+                                   int num_levels)
     : pyramid_(), subwindow_({0, rows - 1, 0, cols - 1}) {
   pyramid_.reserve(num_levels + 1);
   for (int i = 0; i < num_levels + 1; i++) {
     pyramid_.emplace_back(ceil(rows / (double)(1 << i)),
-                          ceil(cols / (double)(1 << i)), CV_64F);
+                          ceil(cols / (double)(1 << i)), CV_64FC(channels));
   }
 }
 
-LaplacianPyramid::LaplacianPyramid(const cv::Mat& image, int num_levels)
-    : pyramid_(), subwindow_({0, image.rows - 1, 0, image.cols - 1}) {
-  CreatePyramid(image, num_levels);
-}
+LaplacianPyramid::LaplacianPyramid(const Mat& image, int num_levels)
+    : LaplacianPyramid(image, num_levels, {0, image.rows - 1,
+                                           0, image.cols - 1}) {}
 
-LaplacianPyramid::LaplacianPyramid(const cv::Mat& image, int num_levels,
+LaplacianPyramid::LaplacianPyramid(const Mat& image, int num_levels,
                                    const std::vector<int>& subwindow) 
     : pyramid_(), subwindow_(subwindow) {
-  CreatePyramid(image, num_levels);
-}
-
-void LaplacianPyramid::CreatePyramid(const cv::Mat& image, int num_levels) {
   pyramid_.reserve(num_levels + 1);
 
-  cv::Mat input;
+  Mat input;
   image.convertTo(input, CV_64F);
 
   GaussianPyramid gauss_pyramid(input, num_levels, subwindow_);
@@ -43,9 +46,9 @@ void LaplacianPyramid::CreatePyramid(const cv::Mat& image, int num_levels) {
 LaplacianPyramid::LaplacianPyramid(LaplacianPyramid&& other)
     : pyramid_(std::move(other.pyramid_)) {}
 
-cv::Mat LaplacianPyramid::Reconstruct() const {
-  cv::Mat base = pyramid_.back();
-  cv::Mat expanded;
+Mat LaplacianPyramid::Reconstruct() const {
+  Mat base = pyramid_.back();
+  Mat expanded;
 
   for (int i = pyramid_.size() - 2; i >= 0; i--) {
     vector<int> subwindow;
@@ -55,8 +58,11 @@ cv::Mat LaplacianPyramid::Reconstruct() const {
 
     expanded.create(pyramid_[i].rows, pyramid_[i].cols, base.type());
 
-    GaussianPyramid::Expand(base, row_offset, col_offset, expanded);
-    //GaussianPyramid::Expand(base, 0, 0, expanded);
+    if (base.channels() == 1) {
+      GaussianPyramid::Expand<double>(base, row_offset, col_offset, expanded);
+    } else if (base.channels() == 3) {
+      GaussianPyramid::Expand<Vec3d>(base, row_offset, col_offset, expanded);
+    }
     base = expanded + pyramid_[i];
   }
 
